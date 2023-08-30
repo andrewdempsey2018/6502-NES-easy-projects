@@ -1,0 +1,31 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "create_object_file",
+            "type": "shell",
+            "command": "ca65 ${fileBasenameNoExtension}.asm -o ${fileBasenameNoExtension}.o -t nes",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+            
+        {
+            "label": "create_nes_rom",
+            "type": "shell",
+            "command": "ld65 ${fileBasenameNoExtension}.o -o ${fileBasenameNoExtension}.nes -t nes",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": [
+                "create_object_file"
+            ]
+        }
+    ]
+}
