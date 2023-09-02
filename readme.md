@@ -15,6 +15,10 @@ A very basic .asm file which will compile into a .NES rom. This program does not
 
 2. blink.asm
 
+3. hello.asm
+
+4. boilerplate.asm
+
 
 ###
 

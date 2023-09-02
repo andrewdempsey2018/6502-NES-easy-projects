@@ -1,4 +1,4 @@
-;simple.asm - the most minimal .asm file that will assemble into a NES rom using the CA65 assembler.
+;simple.asm - minimal .asm file that will assemble into a NES rom using the CA65 assembler.
 ;Here we see a number of segments - "HEARDER", "STARTUP", "ZEROPAGE", "CODE", "VECTORS" and "CHARS"
 
 ;The 'iNES 2.0' header is a virtual cartridge, we use this in place of a physical cart for emulators.
