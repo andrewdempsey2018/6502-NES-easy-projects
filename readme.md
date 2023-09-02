@@ -1,11 +1,29 @@
+## How to assemble
+
 Step 1: Assemble asm file into an object file
 
-ca65 project.asm -o project.o -t nes
+ca65 file.asm -o file.o -t nes
 
-Step 2: link the object file to the nes target
+Step 2: link the object file to the nes target (yields a .NES rom for use with emulator, tested on Fceux)
 
-ld65 project.o -o project.nes -t nes
+ld65 file.o -o file.nes -t nes
 
 ###
 
-If using VSCode, ctrl + shift + b
+1. simple.asm
+A very basic .asm file which will compile into a .NES rom. This program does nothing except enter an infinite loop. It is heavily commented for learning purposes.
+
+2. blink.asm
+
+
+###
+
+Links
+
+## FCEUX:
+
+https://fceux.com/web/home.html
+
+## CC65 (CA65)
+
+https://www.cc65.org/
