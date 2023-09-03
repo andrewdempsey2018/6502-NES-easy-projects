@@ -31,3 +31,7 @@ https://fceux.com/web/home.html
 ## CC65 (CA65)
 
 https://www.cc65.org/
+
+### font
+
+![image of font](/assets/text.bmp)
