@@ -34,4 +34,8 @@ https://www.cc65.org/
 
 ### font
 
-![image of font](/assets/text.bmp)
+![image of font](/assets/text.png)
+
+### NTSC palette
+
+![image of font](/assets/palette_ntsc.png)

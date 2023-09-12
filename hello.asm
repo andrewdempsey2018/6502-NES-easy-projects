@@ -49,8 +49,9 @@ RESET:
 
   TXA
 
-CLEARMEM:
-  ;LDA #$00
+;Clear the 2k of internal ram. ($0000–$07FF)
+CLEARMEM: 
+  LDA #$00
   STA $0000, x
   STA $0100, x
   STA $0300, x
@@ -58,21 +59,38 @@ CLEARMEM:
   STA $0500, x
   STA $0600, x
   STA $0700, x
-  LDA #$FF
+  ;LDA #$FF
   STA $0200, x
   INX
   BNE CLEARMEM
 
-;Wait for VBLANK.
+;Wait for VBLANK. We wit for VBLANK again to ensure the CPU has had time to clear the internal ram.
 :
   BIT $2002
   BPL :-
 
+;To display sprites, a program builds a display list in a 256-byte page of CPU RAM, sometimes called "shadow OAM". 
+;Then the program copies it to OAM in the PPU during the next vertical blanking period by writing the high byte of the display 
+;list's address to $4014. For example, if it places the display list at $0200-$02FF, it writes $02 to $4014.
+;The OAM (Object Attribute Memory) is internal memory inside the PPU that contains a display list of up to 64 sprites,
+; where each sprite's information occupies 4 bytes.
+;https://www.nesdev.org/wiki/PPU_OAM
   LDA #$02
   STA $4014
-  NOP
 
+;The PPU addresses a 14-bit (16kB) address space, $0000-3FFF, completely separate from the CPU's address bus. 
+;It is either directly accessed by the PPU itself, or via the CPU with memory mapped registers at $2006 and $2007.
   ; $3F00
+;The NES has 64 available colours ($00-$3F) - but you should never use colour $0D as it can damage some TV's.
+;The HEX codes for the individual colours can be found online (for example. on the NES Dev Wiki)
+;Of these 64 colours, we can create two palettes of 16 bytes each. Each byte represents a colour.
+;One of these 16 byte palettes will be used for the background and the other will be used for sprites.
+;We store these palettes in the PPU's memory at addresses $3F00 - $3F0F (for the background) 
+;and $3F10 - $3F1F (for the sprites).
+;We cannot talk to the PPU directly but it is memory mapped through $2006 and $2007.
+;We set the address of the PPU by writing to a high byte and a low byte to $2006.
+;So, in the code below, the PPU is configured to be ready to accept palette data by setting
+;its adress to $3F00 - by first setting the high byte via $2006 followed by setting the low byte, again, via $2006.
   LDA #$3F
   STA $2006
   LDA #$00
@@ -80,20 +98,22 @@ CLEARMEM:
 
   LDX #$00
 
-LoadPalettes:
-  LDA PaletteData, X
+;When we then write to $2007, the PPU address automatically increments. So, we can then load in both 16 byte palettes
+;with a loop and the PPU address will increment every time we write to memory map $2007.
+LOADPALETTES:
+  LDA PALETTEDATA, X
   STA $2007 ; $3F00, $3F01, $3F02 => $3F1F
   INX
   CPX #$20
-  BNE LoadPalettes    
+  BNE LOADPALETTES    
 
   LDX #$00
-LoadSprites:
-  LDA SpriteData, X
+LOADSPRITES:
+  LDA SPRITEDATA, X
   STA $0200, X
   INX
   CPX #$28
-  BNE LoadSprites 
+  BNE LOADSPRITES 
 
 ; Enable interrupts
   CLI
@@ -113,11 +133,12 @@ NMI:
     STA $4014
     RTI
 
-PaletteData:
+PALETTEDATA:
   .byte $22,$29,$1A,$0F,$22,$36,$17,$0f,$22,$30,$21,$0f,$22,$27,$17,$0F  ;background palette data
   .byte $22,$16,$27,$18,$22,$1A,$30,$27,$22,$16,$30,$27,$22,$0F,$36,$17  ;sprite palette data
 
-SpriteData:
+SPRITEDATA:
+; Y position, sprite number, attributes, X position
   .byte $28, $07, $00, $28
   .byte $28, $04, $00, $30
   .byte $28, $0B, $00, $38
