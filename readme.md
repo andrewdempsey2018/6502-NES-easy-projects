@@ -4,21 +4,21 @@
 
 Step 1: Assemble asm file into an object file
 
-ca65 file.asm -o file.o -t nes
+**ca65 file.asm -o file.o -t nes**
 
 Step 2: link the object file to the nes target (yields a .NES rom for use with emulator, tested on Fceux)
 
-ld65 file.o -o file.nes -t nes
+**ld65 file.o -o file.nes -t nes**
 
 ###
 
-1. simple.asm
+1. **simple.asm**
 Heavily commented NES code that will assemble into a rom. Does nothing.
 
-2. hello.asm
+2. **hello.asm**
 Heavily commented NES code that will assemble into a rom. Displays 'HELLO WORLD' on screen.
 
-3. boilerplate.asm
+3. **boilerplate.asm**
 Same as hello.asm but with the majority of comments removed - boiler plate code ready for expansion into something more complex.
 
 ###
@@ -27,9 +27,13 @@ Links
 
 ## FCEUX:
 
+Emulator used for testing
+
 https://fceux.com/web/home.html
 
 ## CC65 (CA65)
+
+Assembler used
 
 https://www.cc65.org/
 
