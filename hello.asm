@@ -134,8 +134,7 @@ LOADSPRITES:
 ;A pattern table is 128x128 pixels.
   LDA #%10010000 ; enable NMI change background to use second chr set of tiles ($1000)
   STA $2000
-  ; Enabling sprites and background for leftmost 8 pixels
-  ; Enable sprites and background
+
 ;The PPU register referred to as 'PPUMASK' us mapped to $2001
 ;Bit 4 of PPUMASK enables sprites if set to 1
 ;Bit 3 of PPUMASK enables the background if set to 1
@@ -181,4 +180,5 @@ SPRITEDATA:
   .word RESET
   
 .segment "CHARS"
+;Load graphics chr.
   .incbin "text.chr"

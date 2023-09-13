@@ -1,3 +1,5 @@
+# Simple NES .asm files for study
+
 ## How to assemble
 
 Step 1: Assemble asm file into an object file
@@ -11,14 +13,13 @@ ld65 file.o -o file.nes -t nes
 ###
 
 1. simple.asm
-A very basic .asm file which will compile into a .NES rom. This program does nothing except enter an infinite loop. It is heavily commented for learning purposes.
+Heavily commented NES code that will assemble into a rom. Does nothing.
 
-2. boilerplate_no_sprites.asm
+2. hello.asm
+Heavily commented NES code that will assemble into a rom. Displays 'HELLO WORLD' on screen.
 
-3. hello.asm A heaviliy commented 'Hello World' application for the NES.
-
-4. boilerplate.asm A basic NES game starting point - some sprites pallette data is loaded.
-
+3. boilerplate.asm
+Same as hello.asm but with the majority of comments removed - boiler plate code ready for expansion into something more complex.
 
 ###
 
@@ -32,10 +33,14 @@ https://fceux.com/web/home.html
 
 https://www.cc65.org/
 
-### font
+### Font
+
+This is the font sprites within text.chr
 
 ![image of font](/assets/text.png)
 
 ### NTSC palette
+
+This is a reference for the NES NTSC palette
 
 ![image of font](/assets/palette_ntsc.png)
