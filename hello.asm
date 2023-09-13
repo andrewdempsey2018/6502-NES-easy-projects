@@ -59,28 +59,31 @@ CLEARMEM:
   STA $0500, x
   STA $0600, x
   STA $0700, x
-  ;LDA #$FF
+  ;While we are looping through the ram and clearing it, we take the opportunity to clear
+  ;256 bytes for holding sprite data ($0200 - $02FF). We initialise this sprite data to #$FF
+  ;to ensure that every sprite is off screen and not rendered initially.
+  ;We are using $0200 - $02FF by convention - we could use other space if we wished.
+  LDA #$FF
   STA $0200, x
   INX
   BNE CLEARMEM
 
-;Wait for VBLANK. We wit for VBLANK again to ensure the CPU has had time to clear the internal ram.
+;Wait for VBLANK. We wait for VBLANK again to ensure the CPU has had time to clear the internal ram.
 :
   BIT $2002
   BPL :-
 
-;To display sprites, a program builds a display list in a 256-byte page of CPU RAM, sometimes called "shadow OAM". 
-;Then the program copies it to OAM in the PPU during the next vertical blanking period by writing the high byte of the display 
-;list's address to $4014. For example, if it places the display list at $0200-$02FF, it writes $02 to $4014.
-;The OAM (Object Attribute Memory) is internal memory inside the PPU that contains a display list of up to 64 sprites,
-; where each sprite's information occupies 4 bytes.
-;https://www.nesdev.org/wiki/PPU_OAM
+;Remember that we set aside 256 bytes for the sprite data in $0200 - $02FF.
+;In order to display these sprites, we use a technique called 'direct memory access'
+;or 'DMA'. This technique basically copies a block of ram from the CPU memory to
+;the PPU's sprite memory. All we need to do is write the high byte of the starting point in
+;CPU memory were the data is and the PPU will automatically read that and the rest of the
+;256 bytes.
+;Here we are setting this up, but we use the same code to write the sprite data each frame, so we will see a copy
+;of this code in the NMI section.
   LDA #$02
   STA $4014
 
-;The PPU addresses a 14-bit (16kB) address space, $0000-3FFF, completely separate from the CPU's address bus. 
-;It is either directly accessed by the PPU itself, or via the CPU with memory mapped registers at $2006 and $2007.
-  ; $3F00
 ;The NES has 64 available colours ($00-$3F) - but you should never use colour $0D as it can damage some TV's.
 ;The HEX codes for the individual colours can be found online (for example. on the NES Dev Wiki)
 ;Of these 64 colours, we can create two palettes of 16 bytes each. Each byte represents a colour.
@@ -90,7 +93,7 @@ CLEARMEM:
 ;We cannot talk to the PPU directly but it is memory mapped through $2006 and $2007.
 ;We set the address of the PPU by writing to a high byte and a low byte to $2006.
 ;So, in the code below, the PPU is configured to be ready to accept palette data by setting
-;its adress to $3F00 - by first setting the high byte via $2006 followed by setting the low byte, again, via $2006.
+;its address to $3F00 - by first setting the high byte via $2006 followed by setting the low byte, again, via $2006.
   LDA #$3F
   STA $2006
   LDA #$00
@@ -102,26 +105,44 @@ CLEARMEM:
 ;with a loop and the PPU address will increment every time we write to memory map $2007.
 LOADPALETTES:
   LDA PALETTEDATA, X
-  STA $2007 ; $3F00, $3F01, $3F02 => $3F1F
+  STA $2007 ;Writing to $2007 adds the palette data in PPU memory $3F00 to $3F0F (remember the PPU address is auto incremented when writing to $2007) 
   INX
-  CPX #$20
+  CPX #$20 ;we branch when the X register is equal to $20 ($20 is 32 in decimal) as we have 32 colours to load in
   BNE LOADPALETTES    
 
+;Loop through our 256 bits of sprite data. Sprite data is broken up into 4 bytes per sprite.
+;The first byte is the Y position of the sprite on the screen.
+;The second byte is the sprite number (taken from our CHR file)
+;The third byte is used for setting special attribute of the sprite such as
+;flipping it on the X axis.
+;The fourth byte is the X position of the sprite on the screen.
   LDX #$00
 LOADSPRITES:
   LDA SPRITEDATA, X
   STA $0200, X
   INX
-  CPX #$28
+  CPX #$28 ;Branch when we get to #$28 (#$28 is 40 in decimal, we have 40 pieces of sprite data)
   BNE LOADSPRITES 
 
-; Enable interrupts
+;Enable interrupts (we had previously disabled interrupts during setup)
   CLI
 
+;The PPU register refered to as 'PPUCTRL'	is mapped to $2000.
+;Bit 7 is set to 1 to enable NMI. Bit 4 is set to 1 to use the second pattern table as the background.
+;We have two pattern tables in our CHR file (text.chr)
+;A pattern table is made up of 256 tiles (16x16) and each tile is made up of 8x8 pixels.
+;A pattern table is 128x128 pixels.
   LDA #%10010000 ; enable NMI change background to use second chr set of tiles ($1000)
   STA $2000
-  ; Enabling sprites and background for left-most 8 pixels
+  ; Enabling sprites and background for leftmost 8 pixels
   ; Enable sprites and background
+;The PPU register referred to as 'PPUMASK' us mapped to $2001
+;Bit 4 of PPUMASK enables sprites if set to 1
+;Bit 3 of PPUMASK enables the background if set to 1
+;Bit 2 of PPUMASK if set to 1 shows the sprites at leftmost 8 pixels of the screen, 0 hides them
+;Bit 1 of PPUMASK if set to 1 shows the background at leftmost 8 pixels of the screen, 0 hides it
+;Bits 2 and 1 are useful in some situations where we are scrolling the screen but in out simple
+;program here, we just show those graphics.
   LDA #%00011110
   STA $2001
 

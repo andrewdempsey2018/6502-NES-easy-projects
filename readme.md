@@ -13,11 +13,11 @@ ld65 file.o -o file.nes -t nes
 1. simple.asm
 A very basic .asm file which will compile into a .NES rom. This program does nothing except enter an infinite loop. It is heavily commented for learning purposes.
 
-2. blink.asm
+2. boilerplate_no_sprites.asm
 
-3. hello.asm
+3. hello.asm A heaviliy commented 'Hello World' application for the NES.
 
-4. boilerplate.asm
+4. boilerplate.asm A basic NES game starting point - some sprites pallette data is loaded.
 
 
 ###
